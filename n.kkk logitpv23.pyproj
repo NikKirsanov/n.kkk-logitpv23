@@ -34,6 +34,7 @@
     <Content Include="mm.png" />
     <Content Include="mmm.ico" />
     <Content Include="pngimg.com - pokemon_PNG73.png" />
+    <Content Include=".txt" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

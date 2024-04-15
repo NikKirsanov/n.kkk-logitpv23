@@ -8,7 +8,7 @@ def registreerimine():
         with open("kasutajad.txt", "a") as f:
             f.write(f"{kasutajanimi},{parool}\n")
         print("Kasutaja registreeritud!")
-        aken.configure(bg="#FFFF00")  # Изменяем цвет фона главного окна на желтый при успешной регистрации
+        aken.configure(bg="#FFFF00")
     else:
         print("Kasutajanimi või parool puudub!")
 
@@ -48,24 +48,8 @@ def parooli_muutmine():
                 return
         print("Vale kasutajanimi või parool!")
 
-    top = Toplevel(aken)
-    top.title("Muuda parool")
-    top.geometry("300x200")
-
-    vana_parooli_silt = Label(top, text="Vana parool:")
-    vana_parooli_silt.pack()
-
-    vana_parooli_sisestus = Entry(top, show="*")
-    vana_parooli_sisestus.pack()
-
-    uus_parooli_silt = Label(top, text="Uus parool:")
-    uus_parooli_silt.pack()
-
-    uus_parooli_sisestus = Entry(top, show="*")
-    uus_parooli_sisestus.pack()
-
-    muuda_nupp = Button(top, text="Muuda parool", command=muuda_parool)
-    muuda_nupp.pack()
+def close_window():
+    aken.destroy()
 
 aken = Tk()
 aken.geometry("500x500")
@@ -134,5 +118,8 @@ registreeri_nupp.grid(row=2,column=0)
 autoriseeri_nupp.grid(row=2,column=1)
 
 muuda_parooli_nupp.grid(row=3,column=0,columnspan=2)
+
+close_button = Button(aken, text="Close", command=close_window)
+close_button.pack()
 
 aken.mainloop()

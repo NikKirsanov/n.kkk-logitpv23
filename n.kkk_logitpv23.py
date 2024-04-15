@@ -1,126 +1,138 @@
-from tkinter import *
-from tkinter import messagebox as mb
-from string import *
-from time import sleep
-import random
-import imghdr
-from tkinter import simpledialog as sd
-def autoriseerimine(kasutajad: list, paroolid: list):
-    p = 0
-    while True:
-        kasutaja = input("Sisestage kasutajanimi: ")
-        parool = input("Sisestage parool: ")
-        if kasutaja in kasutajad and parool in paroolid:
-            print("Sisselogimine �nnestus!")
-            return kasutaja
-        else:
-            p += 1
-            print("Vale nimi v�i salas�na!")
-            if p == 5:
-                print("Proovi uuesti 10 sekundi p�rast")
-                for i in range(10):
-                    sleep(1)
-                    print(f"On j��nud {10-i} sekundit")
-            else:
-                print("Kasutajat pole")
-                break
-def tehtudvalik(var):
-    f=var.get()
-    if f:
-        texbox.configure(show="")
-        valik.configure(image=pilt2)
+﻿from tkinter import *
+
+def registreerimine():
+    kasutajanimi = kasutajanime_sisestus.get()
+    parool = parooli_sisestus.get()
+
+    if kasutajanimi and parool: 
+        with open("kasutajad.txt", "a") as f:
+            f.write(f"{kasutajanimi},{parool}\n")
+        print("Kasutaja registreeritud!")
+        aken.configure(bg="#FFFF00")  # Изменяем цвет фона главного окна на желтый при успешной регистрации
     else:
-        texbox.configure(show="*")
-        valik.configure(image=pilt1)
-def textpealkirjasse():
-    vastus=mb.askquestion("K�simus","Kas t�esti tahad info kopeerida?")
-    if vastus=='yes':
-        mb.showwarning("T�helepanu","Kohe teiseldatakse info!")
-        t=texbox.get()
-        pealkiri.configure(text=t)
-        texbox.delete(0,END)
+        print("Kasutajanimi või parool puudub!")
+
+def autoriseerimine():
+    kasutajanimi = kasutajanime_sisestus.get()
+    parool = parooli_sisestus.get()
+
+    with open("kasutajad.txt", "r") as f:
+        kasutajad = f.readlines()
+
+    kasutajad = [kasutaja.strip().split(",") for kasutaja in kasutajad]
+    if [kasutajanimi, parool] in kasutajad:
+        print("Kasutaja autoriseeritud!")
     else:
-        mb.showinfo("Valik oli tehtud","Info j��b omal kohal")
-        nimi=sd.askstring("Saame tuttavaks!","Mis on sinu nimi?")
-aken=Tk()
+        print("Vale kasutajanimi või parool!")
+
+def parooli_muutmine():
+    def muuda_parool():
+        kasutajanimi = kasutajanime_sisestus.get()
+        vana_parool = vana_parooli_sisestus.get()
+        uus_parool = uus_parooli_sisestus.get()
+
+        with open("kasutajad.txt", "r") as f:
+            kasutajad = f.readlines()
+
+        kasutajad = [kasutaja.strip().split(",") for kasutaja in kasutajad]
+        for i, kasutaja in enumerate(kasutajad):
+            if kasutaja[0] == kasutajanimi and kasutaja[1] == vana_parool:
+                kasutajad[i][1] = uus_parool
+                with open("kasutajad.txt", "w") as f:
+                    for kasutaja in kasutajad:
+                        f.write(f"{kasutaja[0]},{kasutaja[1]}\n")
+                print("Parool muudetud!")
+                vana_parooli_sisestus.delete(0, END)  
+                uus_parooli_sisestus.delete(0, END)   
+                top.destroy()
+                return
+        print("Vale kasutajanimi või parool!")
+
+    top = Toplevel(aken)
+    top.title("Muuda parool")
+    top.geometry("300x200")
+
+    vana_parooli_silt = Label(top, text="Vana parool:")
+    vana_parooli_silt.pack()
+
+    vana_parooli_sisestus = Entry(top, show="*")
+    vana_parooli_sisestus.pack()
+
+    uus_parooli_silt = Label(top, text="Uus parool:")
+    uus_parooli_silt.pack()
+
+    uus_parooli_sisestus = Entry(top, show="*")
+    uus_parooli_sisestus.pack()
+
+    muuda_nupp = Button(top, text="Muuda parool", command=muuda_parool)
+    muuda_nupp.pack()
+
+aken = Tk()
 aken.geometry("500x500")
 aken.title("Akna pealkiri")
-aken.configure(bg="#13e0eb")
-aken.iconbitmap("icon.ico")
-pealkiri=Label(aken,
-               text="P�hielemendid",
-               bg="#9edb8f",
-               fg="#18420d",
-               cursor="star",
-               font="Britannic_Bold 16",
-               justify=CENTER,
-               height=3,width=26)
-raam=Frame(aken)
-texbox=Entry(raam,
-             bg="#18420d",
-             fg="#9edb8f",
-             font="Britannic_Bold 16",
-             width=16,
-             show="*")
-pilt=PhotoImage(file="eye.png")
-var=BooleanVar() #IntVar(), StringVar()
-valik=Checkbutton(raam,
-                  image=pilt, #text="Punkt1"
-                  variable=var,
-                  onvalue=True,
-                  offvalue=False,
-                  command=lambda:tehtudvalik(var))
-#valik.deselect()
-nupp=Button(raam,
-            text="Vajuta mind",
-            bg="#9edb8f",
-            fg="#18420d",
-            font="Britannic_Bold 16",
-            width=16,
-            command=textpealkirjasse)
+aken.configure(bg="#ec42f5")
+aken.iconbitmap("mmm.ico")
+
+pealkiri = Label(aken,
+                 text="Nikita Logitpv23",
+                 bg="#f54287",
+                 fg="#111211",
+                 cursor="star",
+                 font="Times_New_Roman 16",
+                 justify=CENTER,
+                 height=3,width=26)
+
+raam = Frame(aken)
+
+kasutajanime_silt = Label(raam, text="Kasutajanimi:")
+parooli_silt = Label(raam, text="Parool:")
+
+kasutajanime_sisestus = Entry(raam,
+                              bg="#f54287",
+                              fg="#111211",
+                              font="Times_New_Roman 16",
+                              width=16)
+
+parooli_sisestus = Entry(raam,
+                         bg="#f54287",
+                         fg="#111211",
+                         font="Times_New_Roman 16",
+                         width=16,
+                         show="*")
+
+registreeri_nupp = Button(raam,
+                          text="Registreeri",
+                          bg="#f54287",
+                          fg="#111211",
+                          font="Times_New_Roman 16",
+                          width=16,
+                          command=registreerimine)
+
+autoriseeri_nupp = Button(raam,
+                          text="Autoriseeri",
+                          bg="#f54287",
+                          fg="#111211",
+                          font="Times_New_Roman 16",
+                          width=16,
+                          command=autoriseerimine)
+
+muuda_parooli_nupp = Button(raam,
+                            text="Muuda parool",
+                            bg="#f54287",
+                            fg="#111211",
+                            font="Times_New_Roman 16",
+                            width=16,
+                            command=parooli_muutmine)
 
 pealkiri.pack()
 raam.pack()
-texbox.grid(row=0,column=0) #raami sees
-valik.grid(row=0,column=1) #raami sees
-nupp.grid(row=0,column=2) #raami sees
+kasutajanime_silt.grid(row=0,column=0)
+kasutajanime_sisestus.grid(row=0,column=1)
+parooli_silt.grid(row=1,column=0)
+parooli_sisestus.grid(row=1,column=1)
+registreeri_nupp.grid(row=2,column=0)
+autoriseeri_nupp.grid(row=2,column=1)
+
+muuda_parooli_nupp.grid(row=3,column=0,columnspan=2)
+
 aken.mainloop()
-
-
-from module1 import *
-kasutajad = ["Nikita"]
-paroolid = ["Nikita2006"]
-kus_vas = loe("Ankeet.txt")
-while True:
-    print("1 - Soorita test\n2 - Logi administraatorina sisse\n3 - L�petamine")
-    vastus = int(input("Sisestage arv: "))
-    if vastus == 1:
-        print("Soorita test")
-        osaleja_nimi = input("Palun sisestage oma nimi: ")
-        receiver_email = input("Sisesta oma email: ")
-        N = int(input("Mitu k�simust soovite? "))
-        punktid, correct_answers = k�simus_vastus(kus_vas, N)
-        salvesta(osaleja_nimi, punktid, "Oiged.txt", "Valed.txt")
-        hindamine = "Positiivne" if punktid > N/2 else "Negatiivne"
-        tulemused_(osaleja_nimi, receiver_email, punktid, hindamine)
-        print("\nEdukalt l�binud osalejad:")
-        with open("Oiged.txt", 'r', encoding='utf-8') as oiged_fail:
-            print(oiged_fail.read())
-            print("\nEba�nnestunud osalejad:")
-        with open("Valed.txt", 'r', encoding='utf-8') as valed_fail:
-            print(valed_fail.read())
-    elif vastus == 2:
-        print("Administraator")
-        autoriseerimine(kasutajad, paroolid)
-        uued = {}
-        uute_arv = int(input("Sisesta mitu tahate teha uute k�simuset: "))
-        for i in range(uute_arv):
-            k�simus = input("Sisestage uus k�simus: ")
-            vastus = input("Sisestage k�simusele vastus: ")
-            uued[k�simus] = vastus
-        lisa(uued, "Ankeet.txt")
-    elif vastus == 3:
-        print("L�petamine")
-        break
-    else:
-        print("Tundmatu valik")
