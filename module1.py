@@ -1,4 +1,78 @@
 from tkinter import *
+import smtplib
+import ssl
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+def parooli_muutmine_aken():
+    def muuda_parool():
+        kasutajanimi = kasutajanimi_sisend.get()
+        vana_parool = vana_parooli_sisend.get()
+        uus_parool = uus_parooli_sisend.get()
+
+        with open("kasutajad.txt", "r") as f:
+            kasutajad = f.readlines()
+
+        kasutajad = [kasutaja.strip().split(",") for kasutaja in kasutajad]
+        for i, kasutaja in enumerate(kasutajad):
+            if kasutaja[0] == kasutajanimi and kasutaja[1] == vana_parool:
+                kasutajad[i][1] = uus_parool
+                with open("kasutajad.txt", "w") as f:
+                    for kasutaja in kasutajad:
+                        f.write(f"{kasutaja[0]},{kasutaja[1]}\n")
+                print("Parool muudetud!")
+                vana_parooli_sisend.delete(0, END)  
+                uus_parooli_sisend.delete(0, END)   
+                muuda_parooli_aken.destroy()
+                send_email("Parooli muutmine", f"Parool muudetud kasutajale: {kasutajanimi}")
+                return
+        print("Vale kasutajanimi või parool!")
+
+    muuda_parooli_aken = Toplevel()
+    muuda_parooli_aken.title("Parooli muutmine")
+    muuda_parooli_aken.geometry("300x200")
+
+    kasutajanimi_silt = Label(muuda_parooli_aken, text="Kasutajanimi:")
+    vana_parooli_silt = Label(muuda_parooli_aken, text="Vana parool:")
+    uus_parooli_silt = Label(muuda_parooli_aken, text="Uus parool:")
+
+    kasutajanimi_sisend = Entry(muuda_parooli_aken)
+    vana_parooli_sisend = Entry(muuda_parooli_aken, show="*")
+    uus_parooli_sisend = Entry(muuda_parooli_aken, show="*")
+
+    muuda_nupp = Button(muuda_parooli_aken, text="Muuda", command=muuda_parool)
+
+    kasutajanimi_silt.grid(row=0, column=0, padx=10, pady=5)
+    kasutajanimi_sisend.grid(row=0, column=1, padx=10, pady=5)
+    vana_parooli_silt.grid(row=1, column=0, padx=10, pady=5)
+    vana_parooli_sisend.grid(row=1, column=1, padx=10, pady=5)
+    uus_parooli_silt.grid(row=2, column=0, padx=10, pady=5)
+    uus_parooli_sisend.grid(row=2, column=1, padx=10, pady=5)
+    muuda_nupp.grid(row=3, column=0, columnspan=2, padx=10, pady=5)
+
+def send_email(subject, body):
+    smtp_server = "smtp.gmail.com"
+    port = 587
+    sender_email = "nik.kirsanov17@gmail.com"  # Замените на свою почту
+    password = input("Введите пароль и нажмите Enter: ")
+    receiver_email = "nik.kirsanov118@gmail.com"  # Замените на адрес получателя
+    context = ssl.create_default_context()
+
+    msg = MIMEMultipart()
+    msg["Subject"] = subject
+    msg["From"] = sender_email
+    msg["To"] = receiver_email
+
+    msg.attach(MIMEText(body, "plain"))
+
+    try:
+        with smtplib.SMTP(smtp_server, port) as server:
+            server.starttls(context=context)
+            server.login(sender_email, password)
+            server.send_message(msg)
+        print("Письмо успешно отправлено.")
+    except Exception as e:
+        print("Ошибка отправки письма:", e)
 
 def registreerimine():
     kasutajanimi = kasutajanime_sisestus.get()
@@ -9,6 +83,7 @@ def registreerimine():
             f.write(f"{kasutajanimi},{parool}\n")
         print("Kasutaja registreeritud!")
         aken.configure(bg="#FFFF00")
+        send_email("Registreerimine", f"Uus kasutaja registreeritud: {kasutajanimi}")
     else:
         print("Kasutajanimi või parool puudub!")
 
@@ -24,32 +99,6 @@ def autoriseerimine():
         print("Kasutaja autoriseeritud!")
     else:
         print("Vale kasutajanimi või parool!")
-
-def parooli_muutmine():
-    def muuda_parool():
-        kasutajanimi = kasutajanime_sisestus.get()
-        vana_parool = vana_parooli_sisestus.get()
-        uus_parool = uus_parooli_sisestus.get()
-
-        with open("kasutajad.txt", "r") as f:
-            kasutajad = f.readlines()
-
-        kasutajad = [kasutaja.strip().split(",") for kasutaja in kasutajad]
-        for i, kasutaja in enumerate(kasutajad):
-            if kasutaja[0] == kasutajanimi and kasutaja[1] == vana_parool:
-                kasutajad[i][1] = uus_parool
-                with open("kasutajad.txt", "w") as f:
-                    for kasutaja in kasutajad:
-                        f.write(f"{kasutaja[0]},{kasutaja[1]}\n")
-                print("Parool muudetud!")
-                vana_parooli_sisestus.delete(0, END)  
-                uus_parooli_sisestus.delete(0, END)   
-                top.destroy()
-                return
-        print("Vale kasutajanimi või parool!")
-
-def close_window():
-    aken.destroy()
 
 aken = Tk()
 aken.geometry("500x500")
@@ -106,7 +155,7 @@ muuda_parooli_nupp = Button(raam,
                             fg="#111211",
                             font="Times_New_Roman 16",
                             width=16,
-                            command=parooli_muutmine)
+                            command=parooli_muutmine_aken)  # Изменено на parooli_muutmine_aken
 
 pealkiri.pack()
 raam.pack()
@@ -119,8 +168,10 @@ autoriseeri_nupp.grid(row=2,column=1)
 
 muuda_parooli_nupp.grid(row=3,column=0,columnspan=2)
 
-close_button = Button(aken, text="Close", command=close_window)
+def close_window():
+    aken.destroy()
+
+close_button = Button(aken, text="Sulge", command=close_window)
 close_button.pack()
 
 aken.mainloop()
-.
